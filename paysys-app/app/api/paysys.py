@@ -8,9 +8,10 @@ import random
 
 
 @api.route('/charges')
+@json
 def charges():
     charges = Charge.query.all()
-    return jsonify({'charges': [charge.export_data() for charge in charges]})
+    return {'charges': [charge.export_data() for charge in charges]}
 
 
 @api.route('/get_charge/<int:id>')
