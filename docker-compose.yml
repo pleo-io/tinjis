@@ -1,6 +1,0 @@
-version: '3'
-services:
-  pleo-antaeus:
-    build: .
-    ports:
-     - "8000:8000"
