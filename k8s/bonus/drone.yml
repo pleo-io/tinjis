@@ -1,0 +1,60 @@
+---
+kind: pipeline
+name: default
+
+steps:
+- name: 
+  image: golang:1.12
+  commands:
+  - apk add --no-cache --virtual .build-deps gcc python3-dev build-base linux-headers
+  - go test -v .
+
+- name: publish image
+  image: plugins/docker
+  settings:
+    repo: docker.mycompany.com/apps/antaeus
+    registry: docker.mycompany.com
+    auto_tag: true
+    username: 
+      from_secret: docker_username
+    password: 
+      from_secret: docker_password
+    tags:
+    - ${DRONE_TAG}
+  when:
+    event: tag
+
+- name: update deploy
+  image: jmccann/drone-terraform:1
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: aws_key_id
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: aws_secret
+  settings:
+    plan: false
+    vars:
+      image_version: ${DRONE_TAG}
+  when:
+    event: tag
+
+# or
+#
+#- name: deploy to k8s
+#  image: docker.mycompany.com/plugins/drone-eks:latest
+#  environment:
+#    AWS_ACCESS_KEY_ID:
+#      from_secret: aws_key_id
+#    AWS_SECRET_ACCESS_KEY:
+#      from_secret: aws_secret
+#    CLUSTER_ROLE:
+#      from_secret: aws_cluster_role
+#    CLUSTER_NAME: devops
+#    AWS_DEFAULT_REGION: us-east-1
+#    IMG_TAG: ${DRONE_TAG}
+#    EKS_NAMESPACE: antaeus
+#  commands:
+#  - cp k8s/01-deployment.yml /root/k8s/01-deployment.yml
+#  - sh /bin/update.sh
+#  when:
+#    event: tag

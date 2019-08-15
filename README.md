@@ -30,9 +30,25 @@ Start by forking this repository. :)
 4. Kubernetes: Provide deployment scripts for both Antaeus and your service. Don't forget about Service resources so we can call Antaeus from outside the cluster and check the results.
     - Bonus points if your scripts use liveness/readiness probes.
 5. **Discussion bonus points:** Use the README file to discuss how this setup could be improved for production environments. We're especially interested in:
-    1. How would a new deployment look like for these services? What kind of tools would you use?
-    2. If a developers needs to push updates to just one of the services, how can we grant that permission without allowing the same developer to deploy any other services running in K8s?
-    3. How do we prevent other services running in the cluster to talk to your service. Only Antaeus should be able to do it.
+
+  1. How would a new deployment look like for these services? What kind of tools would you use?
+```
+  My workflow is generally geared towards "GitOps". I use Terraform with Atlantis for automating service/infrastructure workflows from git repositories using webhooks. For CI/CD, I use Drone, which uses git events to trigger build steps according to each repostories .drone.yml.  I have included a non-working example as I am not familiar with how Pleo's CI/CD pipeline and infrastructure looks.
+```
+
+  2. If a developers needs to push updates to just one of the services, how can we grant that permission without allowing the same developer to deploy any other services running in K8s?
+```
+  For simple acccess management, you can use serviceaccounts with role/rolebinding to allow CRUD operations to the specific namespace for the allocated credentials.  If you are using EKS, you can use IAM policies to manage role/rolebindings by roleARN. If you really want a full-fledged  policy manager for user authorization, then OIDC (OpenID Connect) would be a strong workflow for managing enterprise-style RBAC/HBAC with full auditing capabilities.
+```
+
+  3. How do we prevent other services running in the cluster to talk to your service. Only Antaeus should be able to do it.
+```
+  The NetworkPolicy object with Calico is one way to manage network traffic from service to service without going to the full service-mesh route.  I have included a NetworkPolicy in the payme_app/k8s/bonus directory.  I have not used Istio, but I am aware of the advanced possibilities using that project.  The other solution, with which I am very familiar, Consul Connect, is excellent for managing "intentions" using the Consul catalog of services. This can allow network policy management for external cluster services like databases.
+```
+  X. Extra
+```
+  I edited the Dockerfile for antaeus to run as the pleo user instead of root. Because, ya know...security. Also, I added multi-stage build steps to allow for creating debug, prod, or qa versions if desired in the future.
+```
 
 ## How to run
 
@@ -47,3 +63,36 @@ and the app should build and start running (after a few minutes when gradle does
 1. We will use your scripts to deploy both services to our Kubernetes cluster.
 2. Run the pay endpoint on Antaeus to try and pay the invoices using your service.
 3. Fetch all the invoices from Antaeus and confirm that roughly 50% (remember, your app should randomly fail on some of the invoices) of them will have status "PAID".
+
+
+## How to run 
+
+### Build and tag docker images
+```
+$ make build-all
+```
+
+## Manually re-tag and push to either Docker Hub or internal Docker registry
+
+
+### Deploy all services to kubernetes
+```
+$ make deploy-all
+```
+
+### Launch tunnel process to antaeus
+```
+$ make connect2svc
+```
+
+### Open new terminal
+
+### Check invoice status
+```
+$ make check-pending
+```
+
+### Test triggering invoice payment
+```
+$ make test-payment
+```
