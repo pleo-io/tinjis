@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
-/*
+/* Testing Mock objects
 type invoiceRequest struct {
 	CustomerID int     `json:"customer_id"`
 	Currency   string  `json:"currency"`
@@ -47,7 +47,8 @@ func payInvoice(w http.ResponseWriter, r *http.Request) {
 		false,
 	}
 
-	// set rand seed based on time
+	// Set rand seed based on time. While this is not the most precise,
+	// especially for rapid fire requests, we aren't generating cryptogrphic keys.
 	rand.Seed(time.Now().UnixNano())
 
 	res := invoiceResponse{}
