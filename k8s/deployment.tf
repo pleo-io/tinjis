@@ -29,7 +29,7 @@ resource "kubernetes_deployment" "antaeus" {
 
       spec {
         container {
-          image = "antaeus:0.0.1"
+          image = local.docker_image
           name  = "antaeus"
 
           env {

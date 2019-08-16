@@ -5,7 +5,6 @@ resource "kubernetes_service" "antaeus-svc" {
   }
   spec {
     selector = {
-      //app = "${kubernetes_pod.example.metadata.0.labels.app}"
       app = kubernetes_deployment.antaeus.metadata.0.labels.app
     }
     session_affinity = "ClientIP"
