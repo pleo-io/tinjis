@@ -4,3 +4,6 @@ services:
     build: .
     ports:
      - "8000:8000"
+    environment:
+      # Run fardin-payment-provider using docker-compose command to make it available on localhost:9000
+      - PAYMENT_PROVIDER_ENDPOINT=http://localhost:9000/rest/v1/payments/pay

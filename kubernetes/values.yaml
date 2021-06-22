@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: fardin01/antaeus
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+envs:
+  PAYMENT_PROVIDER_ENDPOINT: http://fardin-payment-provider:80/rest/v1/payments/pay
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources:
+   limits:
+     # Limits are set this high because the container builds using Gradle at runtime, which is a bad practice. Build
+     # should happen in CI pipeline and the container should just start the app.
+     cpu: 2000m
+     memory: 2Gi
+   requests:
+     cpu: 500m
+     memory: 512Mi
+
+probes:
+  livenessProbe:
+    httpGet:
+      path: /rest/health
+      port: http
+    # Not ideal for production environment and auto scaling. Must be tuned.
+    initialDelaySeconds: 90
+    timeoutSeconds: 3
+  readinessProbe:
+    httpGet:
+      path: /rest/health
+      port: http
+    initialDelaySeconds: 90
+    timeoutSeconds: 3
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

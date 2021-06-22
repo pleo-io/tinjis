@@ -1,0 +1,2 @@
+It may take a few minutes for the LoadBalancer IP to be available.
+You can get the hostname of the LoadBalancer by running 'kubectl get --namespace {{ .Release.Namespace }} svc {{ include "fardin-tinjis.fullname" . }} | jq .status.loadBalancer.ingress[0].hostname' (requires jq to be installed).
